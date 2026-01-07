@@ -332,7 +332,7 @@ export function ImageLightbox({ image, images, isOpen, onClose, onNavigate, onEd
                     <div className="flex items-center gap-2">
                       <PeelLogo className="h-4 w-4 text-muted-foreground flex-shrink-0" />
                       <span className="text-muted-foreground flex-shrink-0 w-10">Peel</span>
-                      <div className="relative flex-1">
+                      <div className="relative flex-1 min-w-0">
                         <a
                           href={peelUrl}
                           target="_blank"
