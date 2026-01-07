@@ -1,0 +1,72 @@
+name: Build Manifest
+
+on:
+  push:
+    paths:
+      - 'assets/**'
+  workflow_dispatch:
+  schedule:
+    - cron: '0 2 * * *'
+  workflow_call:
+  repository_dispatch:
+    types: [rebuild_manifest]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: 8
+
+      - name: Install exiftool
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libimage-exiftool-perl
+
+      - name: Install ImageMagick
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y imagemagick
+
+      - name: Verify ImageMagick installation
+        run: |
+          convert -version
+          echo "ImageMagick convert command is available"
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile=false
+
+      - name: Build manifest
+        run: pnpm run build:manifest
+
+      - name: Commit changes if any
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          git add data/manifest.json
+          if git diff --staged --quiet; then
+            echo "No changes to commit"
+          else
+            git stash --include-untracked
+            git pull --rebase
+            git stash pop || true
+            git add data/manifest.json
+            git commit -m "chore: update manifest.json [skip ci]" || echo "Nothing to commit"
+            git push
+          fi

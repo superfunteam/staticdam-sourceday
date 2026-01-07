@@ -1,0 +1,29 @@
+{
+  "name": "staticdam",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "pnpm -F site dev",
+    "build": "pnpm -F site build",
+    "build:manifest": "tsx scripts/build-manifest.ts",
+    "generate:thumbnails": "tsx scripts/generate-thumbnails.ts",
+    "test:functions": "pnpm -F functions test"
+  },
+  "devDependencies": {
+    "@types/jsonwebtoken": "^9.0.6",
+    "@types/node": "^20.14.0",
+    "tsx": "^4.7.0",
+    "typescript": "^5.4.0"
+  },
+  "engines": {
+    "node": ">=18",
+    "pnpm": ">=8"
+  },
+  "dependencies": {
+    "@netlify/functions": "^2.6.0",
+    "@octokit/app": "^14.0.2",
+    "glob": "^10.4.5",
+    "jsonwebtoken": "^9.0.2",
+    "sharp": "^0.33.3"
+  }
+}
