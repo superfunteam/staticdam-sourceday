@@ -29,9 +29,9 @@ async function generateEnvVars() {
     SHARED_WRITE_HASH: passwordHash,
     SESSION_SIGNING_KEY: signingKey,
     REPO_OWNER: 'superfunteam',
-    REPO_NAME: 'staticdam.com',
+    REPO_NAME: 'staticdam-sourceday',
     DEFAULT_BRANCH: 'main',
-    PUBLIC_BASE_URL: 'https://supplierio.staticdam.com',
+    PUBLIC_BASE_URL: 'https://sourceday.staticdam.com',
   };
 }
 
