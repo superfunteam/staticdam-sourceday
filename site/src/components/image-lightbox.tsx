@@ -27,6 +27,13 @@ const StaticDAMLogo = ({ className }: { className?: string }) => (
   </svg>
 )
 
+// Peel Logo Component
+const PeelLogo = ({ className }: { className?: string }) => (
+  <svg width="16" height="16" viewBox="0 0 56 56" fill="none" xmlns="http://www.w3.org/2000/svg" className={className}>
+    <path d="M30.101 0.675201C35.3095 0.675201 38.9172 5.06785 41.0892 9.39005V9.39102C43.3271 13.8476 44.5247 19.1409 44.5248 22.6C44.5248 25.9523 44.0898 29.2197 43.2689 32.3061C44.6337 32.7077 45.942 33.2937 47.1595 34.0541H47.1605C49.4551 35.4892 51.3414 37.4927 52.6322 39.8734C53.8421 42.1052 54.4898 44.5952 54.5258 47.1273L54.5248 47.6342C54.5066 48.6965 53.6292 49.5438 52.5658 49.5258H52.5638C51.5047 49.5042 50.6563 48.6291 50.6742 47.5668V47.5658C50.7119 45.5232 50.2215 43.5028 49.2484 41.7074V41.7065C48.2724 39.9127 46.851 38.3992 45.1205 37.3178H45.1195C44.1733 36.7252 43.1472 36.276 42.0775 35.9731C37.9279 46.7105 28.7117 54.5247 16.3734 54.5248C13.4409 54.5248 9.7561 54.5353 6.80408 53.851C5.31831 53.5068 3.81555 52.9429 2.65759 51.9545V51.9535C1.42022 50.8966 0.675171 49.4314 0.675171 47.599C0.675211 46.4202 0.900013 45.328 1.48572 44.3783L1.48669 44.3773C2.07477 43.4283 2.90784 42.8037 3.78845 42.3607C4.63978 41.9325 5.62617 41.6271 6.61658 41.3559C7.11867 41.2185 7.66028 41.0794 8.2113 40.9369L9.95837 40.4711L10.0082 40.4565C16.4312 38.6754 21.3989 34.6774 24.2953 29.682C23.3224 29.2945 22.3014 29.0273 21.2435 28.8803V28.8813C17.2262 28.3272 12.6529 29.4332 8.55505 31.7729L8.55408 31.7719C7.63236 32.299 6.45395 31.9777 5.92712 31.0541V31.0531C5.40098 30.1317 5.72202 28.9539 6.6449 28.4272C11.2991 25.7673 16.7247 24.3737 21.7699 25.0688L22.3959 25.1664C23.61 25.3785 24.792 25.7181 25.9271 26.1879C27.423 22.0251 27.5952 17.4198 26.142 12.9174L26.1097 12.8168V12.8051C25.3451 10.3609 24.8601 7.65448 25.1615 5.43106C25.3149 4.29277 25.7009 3.09606 26.5502 2.16153C27.4516 1.16593 28.6926 0.675233 30.101 0.675201ZM27.5922 31.6654C24.3403 37.23 18.9301 41.6775 12.0844 43.85L12.1049 43.8705L10.9906 44.1811C10.3441 44.361 9.73208 44.5172 9.1781 44.6615L9.17615 44.6625L7.63513 45.0697C6.67599 45.3334 6.00465 45.5558 5.51794 45.8002L5.51697 45.7992C5.05814 46.0309 4.86651 46.2323 4.76111 46.4027C4.65514 46.5763 4.52576 46.9072 4.52576 47.599C4.52579 48.2694 4.751 48.6767 5.16052 49.0258L5.16248 49.0277C5.64585 49.4434 6.46236 49.8184 7.67126 50.0981L8.13708 50.1977C10.5068 50.6642 13.4993 50.6742 16.3734 50.6742C26.4298 50.6742 34.2766 44.5396 38.1117 35.5492C36.4991 35.6497 34.9206 36.076 33.476 36.8129L33.4769 36.8139C33.0179 37.0488 32.4854 37.0887 31.9974 36.9262V36.9252C31.5122 36.7658 31.1087 36.4206 30.8783 35.9633L30.8773 35.9613C29.9761 34.157 28.8577 32.7456 27.5922 31.6654ZM30.101 4.52579C29.8551 4.52579 29.7028 4.56367 29.6078 4.60294C29.517 4.64045 29.454 4.68915 29.3988 4.74942C29.2622 4.90303 29.0712 5.25455 28.9769 5.94962C28.7833 7.37492 29.0946 9.48491 29.809 11.7367L29.8119 11.7445L29.8138 11.7523L30.184 13.0199L30.1869 13.0287L30.1888 13.0365C31.5577 18.2187 31.1464 23.4313 29.3177 28.1117C30.88 29.2821 32.2679 30.786 33.4271 32.6459C35.3514 31.935 37.403 31.6031 39.4652 31.683C40.2551 28.8308 40.6761 25.7742 40.6761 22.6C40.676 19.808 39.6492 15.1023 37.6498 11.1215H37.6488C35.5849 7.00992 32.9426 4.52582 30.101 4.52579Z" fill="currentColor" stroke="currentColor" strokeWidth="1.35"/>
+  </svg>
+)
+
 interface ImageLightboxProps {
   image: ImageMetadata
   images: ImageMetadata[]
@@ -108,6 +115,7 @@ export function ImageLightbox({ image, images, isOpen, onClose, onNavigate, onEd
   // Generate share URLs
   const damUrl = `${window.location.origin}/asset/${encodeURIComponent(image.path)}`
   const assetUrl = `${window.location.origin}/${image.path}`
+  const peelUrl = `https://banana.peel.diy/edit?img=${encodeURIComponent(assetUrl)}`
 
   // Copy to clipboard functionality
   const copyToClipboard = async (text: string, label: string) => {
@@ -314,6 +322,33 @@ export function ImageLightbox({ image, images, isOpen, onClose, onNavigate, onEd
                         <button
                           className="absolute right-1 top-1/2 -translate-y-1/2 p-1 hover:bg-gray-100 dark:hover:bg-gray-800 rounded transition-colors"
                           onClick={() => copyToClipboard(assetUrl, 'Asset URL')}
+                        >
+                          <Copy className="h-3 w-3 text-muted-foreground" />
+                        </button>
+                      </div>
+                    </div>
+
+                    {/* Peel */}
+                    <div className="flex items-center gap-2">
+                      <PeelLogo className="h-4 w-4 text-muted-foreground flex-shrink-0" />
+                      <span className="text-muted-foreground flex-shrink-0 w-10">Peel</span>
+                      <div className="relative flex-1">
+                        <a
+                          href={peelUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="block w-full px-2 pr-8 py-1 text-xs border rounded bg-muted/50 text-muted-foreground truncate hover:bg-muted/70 transition-colors cursor-pointer"
+                          title={peelUrl}
+                        >
+                          {peelUrl}
+                        </a>
+                        <button
+                          className="absolute right-1 top-1/2 -translate-y-1/2 p-1 hover:bg-gray-100 dark:hover:bg-gray-800 rounded transition-colors"
+                          onClick={(e) => {
+                            e.preventDefault()
+                            e.stopPropagation()
+                            copyToClipboard(peelUrl, 'Peel URL')
+                          }}
                         >
                           <Copy className="h-3 w-3 text-muted-foreground" />
                         </button>
