@@ -314,7 +314,7 @@ export default function LibraryPage() {
 
   return (
     <>
-      <div className="grid auto-rows-min gap-4 md:grid-cols-3 lg:grid-cols-4">
+      <div className="grid auto-rows-min gap-4 grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
         {filteredImages.map((image) => (
           <ImageGridItem
             key={image.path}

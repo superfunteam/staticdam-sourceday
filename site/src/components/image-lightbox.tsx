@@ -213,9 +213,9 @@ export function ImageLightbox({ image, images, isOpen, onClose, onNavigate, onEd
         className="inset-0 w-full max-w-full h-full p-0 border-none sm:max-w-full bg-transparent"
         side="right"
       >
-        <div className="flex h-full">
+        <div className="flex flex-col md:flex-row h-full">
           {/* Image Area - No animation on container to prevent interference */}
-          <div className="flex-1 flex items-center justify-center p-4 relative">
+          <div className="flex-1 flex items-center justify-center p-4 relative h-1/2 md:h-full">
 
             {/* Main Media (Image or Video) */}
             <div className="max-w-full max-h-full flex items-center justify-center relative">
@@ -289,7 +289,7 @@ export function ImageLightbox({ image, images, isOpen, onClose, onNavigate, onEd
 
 
             {/* Navigation Bar */}
-            <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex items-center gap-4 bg-black/50 text-white px-4 py-2 rounded-full">
+            <div className="absolute bottom-4 md:bottom-4 left-1/2 -translate-x-1/2 flex items-center gap-4 bg-black/50 text-white px-4 py-2 rounded-full z-10">
               {hasPrev ? (
                 <Button
                   variant="ghost"
@@ -322,10 +322,14 @@ export function ImageLightbox({ image, images, isOpen, onClose, onNavigate, onEd
             </div>
           </div>
 
-          {/* Metadata Sidebar */}
-          <div className="w-96 bg-white dark:bg-black flex flex-col animate-in slide-in-from-right duration-500">
+          {/* Metadata Sidebar / Bottom Sheet */}
+          <div className="w-full md:w-96 h-1/2 md:h-full bg-white dark:bg-black flex flex-col rounded-t-2xl md:rounded-none shadow-[0_-4px_20px_rgba(0,0,0,0.15)] md:shadow-none animate-in slide-in-from-bottom md:slide-in-from-right duration-500">
+            {/* Mobile drag handle indicator */}
+            <div className="md:hidden flex justify-center pt-3 pb-1">
+              <div className="w-10 h-1 bg-gray-300 dark:bg-gray-600 rounded-full" />
+            </div>
 
-            <div className="flex-1 px-6 py-6 overflow-y-auto">
+            <div className="flex-1 px-6 py-4 md:py-6 overflow-y-auto">
               <div>
                 {/* File Info */}
                 <div>
