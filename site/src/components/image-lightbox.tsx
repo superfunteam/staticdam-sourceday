@@ -47,6 +47,8 @@ interface ImageLightboxProps {
 export function ImageLightbox({ image, images, isOpen, onClose, onNavigate, onEditMetadata, onFilterSelect }: ImageLightboxProps) {
   const [isLoading, setIsLoading] = useState(true)
   const [imageDimensions, setImageDimensions] = useState({ width: 0, height: 0 })
+  const [loadProgress, setLoadProgress] = useState({ loaded: 0, total: 0 })
+  const [imageBlobUrl, setImageBlobUrl] = useState<string | null>(null)
   const imgRef = useRef<HTMLImageElement>(null)
   const videoRef = useRef<HTMLVideoElement>(null)
   const currentIndex = images.findIndex(img => img.path === image.path)
@@ -78,7 +80,74 @@ export function ImageLightbox({ image, images, isOpen, onClose, onNavigate, onEd
   useEffect(() => {
     setIsLoading(true)
     setImageDimensions({ width: 0, height: 0 })
+    setLoadProgress({ loaded: 0, total: 0 })
+    setImageBlobUrl(null)
   }, [image.path])
+
+  // Cleanup blob URL on unmount or when it changes
+  useEffect(() => {
+    return () => {
+      if (imageBlobUrl) {
+        URL.revokeObjectURL(imageBlobUrl)
+      }
+    }
+  }, [imageBlobUrl])
+
+  // Fetch image with progress tracking (only for non-video)
+  useEffect(() => {
+    if (isVideo || !isOpen) return
+
+    const controller = new AbortController()
+
+    const fetchImageWithProgress = async () => {
+      try {
+        const response = await fetch(`/${image.path}`, { signal: controller.signal })
+
+        if (!response.ok) throw new Error('Failed to load image')
+
+        const contentLength = response.headers.get('Content-Length')
+        const total = contentLength ? parseInt(contentLength, 10) : image.bytes || 0
+
+        if (!response.body) {
+          // Fallback: no streaming support, just wait for full load
+          const blob = await response.blob()
+          const url = URL.createObjectURL(blob)
+          setImageBlobUrl(url)
+          setLoadProgress({ loaded: total, total })
+          return
+        }
+
+        const reader = response.body.getReader()
+        const chunks: Uint8Array[] = []
+        let loaded = 0
+
+        while (true) {
+          const { done, value } = await reader.read()
+          if (done) break
+
+          chunks.push(value)
+          loaded += value.length
+          setLoadProgress({ loaded, total })
+        }
+
+        // Combine chunks into blob
+        const blob = new Blob(chunks)
+        const url = URL.createObjectURL(blob)
+        setImageBlobUrl(url)
+      } catch (err) {
+        if ((err as Error).name !== 'AbortError') {
+          console.error('Error loading image:', err)
+          setIsLoading(false)
+        }
+      }
+    }
+
+    fetchImageWithProgress()
+
+    return () => {
+      controller.abort()
+    }
+  }, [image.path, isVideo, isOpen])
 
   const handleDownload = () => {
     const link = document.createElement('a')
@@ -154,7 +223,26 @@ export function ImageLightbox({ image, images, isOpen, onClose, onNavigate, onEd
                 <div className="absolute inset-0 flex items-center justify-center">
                   <div className="flex flex-col items-center gap-3">
                     <Loader2 className="h-8 w-8 animate-spin text-white" />
-                    <span className="text-white text-sm">Loading {isVideo ? 'video' : 'image'}...</span>
+                    {isVideo ? (
+                      <span className="text-white text-sm">Loading video...</span>
+                    ) : loadProgress.total > 0 ? (
+                      <div className="flex flex-col items-center gap-2">
+                        <span className="text-white text-sm">
+                          {formatFileSize(loadProgress.loaded)} / {formatFileSize(loadProgress.total)}
+                        </span>
+                        <div className="w-48 h-1.5 bg-white/20 rounded-full overflow-hidden">
+                          <div
+                            className="h-full bg-white rounded-full transition-all duration-150"
+                            style={{ width: `${Math.round((loadProgress.loaded / loadProgress.total) * 100)}%` }}
+                          />
+                        </div>
+                        <span className="text-white/60 text-xs">
+                          {Math.round((loadProgress.loaded / loadProgress.total) * 100)}%
+                        </span>
+                      </div>
+                    ) : (
+                      <span className="text-white text-sm">Loading image...</span>
+                    )}
                   </div>
                 </div>
               )}
@@ -178,10 +266,10 @@ export function ImageLightbox({ image, images, isOpen, onClose, onNavigate, onEd
                   }}
                   onError={() => setIsLoading(false)}
                 />
-              ) : (
+              ) : imageBlobUrl ? (
                 <img
                   ref={imgRef}
-                  src={`/${image.path}`}
+                  src={imageBlobUrl}
                   alt={image.subject || fileName}
                   className={`max-w-full max-h-full object-contain ${
                     isLoading ? 'opacity-0' : 'opacity-100 animate-in fade-in slide-in-from-bottom-8 duration-500 fill-mode-both'
@@ -196,7 +284,7 @@ export function ImageLightbox({ image, images, isOpen, onClose, onNavigate, onEd
                   }}
                   onError={() => setIsLoading(false)}
                 />
-              )}
+              ) : null}
             </div>
 
 
