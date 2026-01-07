@@ -51,6 +51,7 @@ export function ImageLightbox({ image, images, isOpen, onClose, onNavigate, onEd
   const [imageBlobUrl, setImageBlobUrl] = useState<string | null>(null)
   const [swipeOffset, setSwipeOffset] = useState(0)
   const [sheetDragOffset, setSheetDragOffset] = useState(0)
+  const [isClosing, setIsClosing] = useState(false)
   const imgRef = useRef<HTMLImageElement>(null)
   const videoRef = useRef<HTMLVideoElement>(null)
   const touchStartRef = useRef<{ x: number; y: number; time: number } | null>(null)
@@ -60,6 +61,17 @@ export function ImageLightbox({ image, images, isOpen, onClose, onNavigate, onEd
   const hasPrev = currentIndex > 0
   const hasNext = currentIndex < images.length - 1
   const isVideo = image.isVideo || /\.(mp4|mov|webm|avi)$/i.test(image.path)
+
+  // Animated close function - slides sheet down then closes
+  const closeWithAnimation = useCallback(() => {
+    setIsClosing(true)
+    setSheetDragOffset(window.innerHeight) // Slide fully off screen
+    setTimeout(() => {
+      setIsClosing(false)
+      setSheetDragOffset(0)
+      onClose()
+    }, 300) // Match the transition duration
+  }, [onClose])
 
   // Touch handlers for image swipe navigation
   const handleTouchStart = useCallback((e: React.TouchEvent) => {
@@ -122,12 +134,15 @@ export function ImageLightbox({ image, images, isOpen, onClose, onNavigate, onEd
     const closeThreshold = 100 // minimum distance to close
 
     if (sheetDragOffset > closeThreshold) {
-      onClose()
+      // Continue the animation to close
+      closeWithAnimation()
+    } else {
+      // Snap back with animation
+      setSheetDragOffset(0)
     }
 
-    setSheetDragOffset(0)
     sheetTouchStartRef.current = null
-  }, [sheetDragOffset, onClose])
+  }, [sheetDragOffset, closeWithAnimation])
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -416,7 +431,7 @@ export function ImageLightbox({ image, images, isOpen, onClose, onNavigate, onEd
 
           {/* Metadata Sidebar / Bottom Sheet */}
           <div
-            className="w-full md:w-96 h-1/2 md:h-full bg-white dark:bg-black flex flex-col rounded-t-2xl md:rounded-none shadow-[0_-4px_20px_rgba(0,0,0,0.15)] md:shadow-none animate-in slide-in-from-bottom duration-300 md:animate-none transition-transform"
+            className={`w-full md:w-96 h-1/2 md:h-full bg-white dark:bg-black flex flex-col rounded-t-2xl md:rounded-none shadow-[0_-4px_20px_rgba(0,0,0,0.15)] md:shadow-none animate-in slide-in-from-bottom duration-300 md:animate-none ${isClosing ? 'transition-transform duration-300 ease-out' : 'transition-transform duration-150 ease-out'}`}
             style={{ transform: sheetDragOffset ? `translateY(${sheetDragOffset}px)` : undefined }}
           >
             {/* Mobile drag handle - tappable to close, draggable */}
@@ -425,7 +440,7 @@ export function ImageLightbox({ image, images, isOpen, onClose, onNavigate, onEd
               onTouchStart={handleSheetTouchStart}
               onTouchMove={handleSheetTouchMove}
               onTouchEnd={handleSheetTouchEnd}
-              onClick={onClose}
+              onClick={closeWithAnimation}
             >
               <div className="w-10 h-1 bg-gray-300 dark:bg-gray-600 rounded-full" />
             </div>
