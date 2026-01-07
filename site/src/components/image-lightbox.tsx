@@ -1,5 +1,5 @@
-import React, { useEffect, useState, useRef } from 'react'
-import { ChevronLeft, ChevronRight, Download, Tag, Camera, Hash, Loader2, User, Copy, Image, Package, Edit, Info } from 'lucide-react'
+import React, { useEffect, useState, useRef, useCallback } from 'react'
+import { ChevronLeft, ChevronRight, Download, Tag, Camera, Hash, Loader2, User, Copy, Image, Package, Edit, Info, X } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Separator } from '@/components/ui/separator'
@@ -49,12 +49,85 @@ export function ImageLightbox({ image, images, isOpen, onClose, onNavigate, onEd
   const [imageDimensions, setImageDimensions] = useState({ width: 0, height: 0 })
   const [loadProgress, setLoadProgress] = useState({ loaded: 0, total: 0 })
   const [imageBlobUrl, setImageBlobUrl] = useState<string | null>(null)
+  const [swipeOffset, setSwipeOffset] = useState(0)
+  const [sheetDragOffset, setSheetDragOffset] = useState(0)
   const imgRef = useRef<HTMLImageElement>(null)
   const videoRef = useRef<HTMLVideoElement>(null)
+  const touchStartRef = useRef<{ x: number; y: number; time: number } | null>(null)
+  const sheetTouchStartRef = useRef<{ y: number; time: number } | null>(null)
+  const imageContainerRef = useRef<HTMLDivElement>(null)
   const currentIndex = images.findIndex(img => img.path === image.path)
   const hasPrev = currentIndex > 0
   const hasNext = currentIndex < images.length - 1
   const isVideo = image.isVideo || /\.(mp4|mov|webm|avi)$/i.test(image.path)
+
+  // Touch handlers for image swipe navigation
+  const handleTouchStart = useCallback((e: React.TouchEvent) => {
+    const touch = e.touches[0]
+    touchStartRef.current = { x: touch.clientX, y: touch.clientY, time: Date.now() }
+  }, [])
+
+  const handleTouchMove = useCallback((e: React.TouchEvent) => {
+    if (!touchStartRef.current) return
+    const touch = e.touches[0]
+    const deltaX = touch.clientX - touchStartRef.current.x
+    const deltaY = Math.abs(touch.clientY - touchStartRef.current.y)
+
+    // Only track horizontal swipes (ignore if more vertical)
+    if (deltaY < Math.abs(deltaX)) {
+      setSwipeOffset(deltaX)
+    }
+  }, [])
+
+  const handleTouchEnd = useCallback(() => {
+    if (!touchStartRef.current) return
+
+    const swipeThreshold = 50 // minimum distance
+    const velocityThreshold = 0.3 // pixels per ms
+    const elapsed = Date.now() - touchStartRef.current.time
+    const velocity = Math.abs(swipeOffset) / elapsed
+
+    if (Math.abs(swipeOffset) > swipeThreshold || velocity > velocityThreshold) {
+      if (swipeOffset > 0 && hasPrev) {
+        onNavigate('prev')
+      } else if (swipeOffset < 0 && hasNext) {
+        onNavigate('next')
+      }
+    }
+
+    setSwipeOffset(0)
+    touchStartRef.current = null
+  }, [swipeOffset, hasPrev, hasNext, onNavigate])
+
+  // Touch handlers for bottom sheet drag-to-close
+  const handleSheetTouchStart = useCallback((e: React.TouchEvent) => {
+    const touch = e.touches[0]
+    sheetTouchStartRef.current = { y: touch.clientY, time: Date.now() }
+  }, [])
+
+  const handleSheetTouchMove = useCallback((e: React.TouchEvent) => {
+    if (!sheetTouchStartRef.current) return
+    const touch = e.touches[0]
+    const deltaY = touch.clientY - sheetTouchStartRef.current.y
+
+    // Only allow dragging down
+    if (deltaY > 0) {
+      setSheetDragOffset(deltaY)
+    }
+  }, [])
+
+  const handleSheetTouchEnd = useCallback(() => {
+    if (!sheetTouchStartRef.current) return
+
+    const closeThreshold = 100 // minimum distance to close
+
+    if (sheetDragOffset > closeThreshold) {
+      onClose()
+    }
+
+    setSheetDragOffset(0)
+    sheetTouchStartRef.current = null
+  }, [sheetDragOffset, onClose])
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -210,15 +283,34 @@ export function ImageLightbox({ image, images, isOpen, onClose, onNavigate, onEd
   return (
     <Sheet open={isOpen} onOpenChange={onClose}>
       <SheetContent
-        className="inset-0 w-full max-w-full h-full p-0 border-none sm:max-w-full bg-transparent"
+        className="inset-0 w-full max-w-full h-full p-0 border-none sm:max-w-full bg-transparent [&[data-state=open]]:animate-none [&[data-state=closed]]:animate-none"
         side="right"
+        hideCloseButton
       >
-        <div className="flex flex-col md:flex-row h-full">
-          {/* Image Area - No animation on container to prevent interference */}
-          <div className="flex-1 flex items-center justify-center p-4 relative h-1/2 md:h-full">
+        {/* Custom close button with proper z-index */}
+        <button
+          onClick={onClose}
+          className="absolute right-4 top-4 z-50 p-2 rounded-full bg-black/50 text-white hover:bg-black/70 transition-colors"
+          aria-label="Close"
+        >
+          <X className="h-5 w-5" />
+        </button>
+
+        <div className="flex flex-col md:flex-row h-full animate-in fade-in duration-300">
+          {/* Image Area */}
+          <div
+            ref={imageContainerRef}
+            className="flex-1 flex items-center justify-center p-4 relative h-1/2 md:h-full"
+            onTouchStart={handleTouchStart}
+            onTouchMove={handleTouchMove}
+            onTouchEnd={handleTouchEnd}
+          >
 
             {/* Main Media (Image or Video) */}
-            <div className="max-w-full max-h-full flex items-center justify-center relative">
+            <div
+              className="max-w-full max-h-full flex items-center justify-center relative transition-transform duration-150 ease-out"
+              style={{ transform: swipeOffset ? `translateX(${swipeOffset}px)` : undefined }}
+            >
               {isLoading && (
                 <div className="absolute inset-0 flex items-center justify-center">
                   <div className="flex flex-col items-center gap-3">
@@ -323,9 +415,18 @@ export function ImageLightbox({ image, images, isOpen, onClose, onNavigate, onEd
           </div>
 
           {/* Metadata Sidebar / Bottom Sheet */}
-          <div className="w-full md:w-96 h-1/2 md:h-full bg-white dark:bg-black flex flex-col rounded-t-2xl md:rounded-none shadow-[0_-4px_20px_rgba(0,0,0,0.15)] md:shadow-none animate-in slide-in-from-bottom md:slide-in-from-right duration-500">
-            {/* Mobile drag handle indicator */}
-            <div className="md:hidden flex justify-center pt-3 pb-1">
+          <div
+            className="w-full md:w-96 h-1/2 md:h-full bg-white dark:bg-black flex flex-col rounded-t-2xl md:rounded-none shadow-[0_-4px_20px_rgba(0,0,0,0.15)] md:shadow-none animate-in slide-in-from-bottom duration-300 md:animate-none transition-transform"
+            style={{ transform: sheetDragOffset ? `translateY(${sheetDragOffset}px)` : undefined }}
+          >
+            {/* Mobile drag handle - tappable to close, draggable */}
+            <div
+              className="md:hidden flex justify-center pt-3 pb-1 cursor-grab active:cursor-grabbing touch-none"
+              onTouchStart={handleSheetTouchStart}
+              onTouchMove={handleSheetTouchMove}
+              onTouchEnd={handleSheetTouchEnd}
+              onClick={onClose}
+            >
               <div className="w-10 h-1 bg-gray-300 dark:bg-gray-600 rounded-full" />
             </div>
 
