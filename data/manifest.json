@@ -118,5 +118,11 @@
     "w": 3862,
     "h": 2578,
     "bytes": 5972398
+  },
+  {
+    "path": "assets/test-uploads/test-image.jpg",
+    "w": 1,
+    "h": 1,
+    "bytes": 285
   }
 ]
