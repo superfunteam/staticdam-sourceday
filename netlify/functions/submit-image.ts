@@ -222,9 +222,12 @@ async function getInstallationOctokit() {
     throw new Error('GitHub App not configured')
   }
 
+  // Handle private key that may have literal \n instead of newlines
+  const privateKey = process.env.GITHUB_PRIVATE_KEY.replace(/\\n/g, '\n')
+
   const app = new App({
     appId: process.env.GITHUB_APP_ID,
-    privateKey: process.env.GITHUB_PRIVATE_KEY,
+    privateKey,
   })
 
   return app.getInstallationOctokit(parseInt(process.env.GITHUB_INSTALLATION_ID))
