@@ -66,6 +66,44 @@ netlify env:set GITHUB_INSTALLATION_ID 'YOUR_INSTALLATION_ID'
 netlify env:set GITHUB_PRIVATE_KEY "$(cat ~/Downloads/your-app.*.private-key.pem)"
 ```
 
+## 🔄 Image Submission API Setup
+
+The `/api/submit-image` endpoint allows external apps to submit images via PR. It requires an additional GitHub App permission.
+
+### Add Pull Request Permission to GitHub App
+
+1. Go to your GitHub App settings: https://github.com/settings/apps
+2. Find your StaticDAM App and click "Edit"
+3. Go to "Permissions & events" in the sidebar
+4. Under **Repository permissions**, find **Pull requests**
+5. Change from "No access" to **Read and write**
+6. Click "Save changes"
+7. Go to "Install App" and re-authorize if prompted
+
+### Test the API
+
+```bash
+# Test with a small image
+curl -X POST https://sourceday.staticdam.com/api/submit-image \
+  -F "file=@test-image.jpg" \
+  -F "subfolder=incoming"
+
+# Response:
+# {"success":true,"pr_url":"https://github.com/superfunteam/staticdam-sourceday/pull/123",...}
+```
+
+### API Parameters
+
+| Parameter | Required | Description |
+|-----------|----------|-------------|
+| file | Yes | The image file (max 25MB) |
+| filename | No | Override filename |
+| subfolder | No | Path within assets/ (default: "incoming") |
+| category | No | JSON array, e.g. `["portrait"]` |
+| person | No | JSON array, e.g. `["Jimmy"]` |
+| tags | No | JSON array, e.g. `["2024"]` |
+| product | No | JSON array, e.g. `["widget"]` |
+
 ## Testing
 
 1. Visit https://sourceday.staticdam.com
