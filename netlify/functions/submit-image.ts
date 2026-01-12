@@ -217,13 +217,32 @@ async function parseMultipartForm(event: any): Promise<ParsedForm> {
   })
 }
 
+function formatPrivateKey(key: string): string {
+  // If key already has newlines, just clean up any \n literals
+  if (key.includes('\n') && !key.startsWith('-----BEGIN')) {
+    return key.replace(/\\n/g, '\n')
+  }
+
+  // If key is on single line with spaces, reformat it
+  // Format: -----BEGIN RSA PRIVATE KEY----- BASE64... -----END RSA PRIVATE KEY-----
+  const match = key.match(/^(-----BEGIN [A-Z ]+ KEY-----)\s+(.+)\s+(-----END [A-Z ]+ KEY-----)$/)
+  if (match) {
+    const [, header, body, footer] = match
+    // Split body into 64-char lines (PEM format)
+    const bodyLines = body.replace(/\s+/g, '').match(/.{1,64}/g) || []
+    return [header, ...bodyLines, footer].join('\n')
+  }
+
+  // Fallback: just replace literal \n
+  return key.replace(/\\n/g, '\n')
+}
+
 async function getInstallationOctokit() {
   if (!process.env.GITHUB_APP_ID || !process.env.GITHUB_INSTALLATION_ID || !process.env.GITHUB_PRIVATE_KEY) {
     throw new Error('GitHub App not configured')
   }
 
-  // Handle private key that may have literal \n instead of newlines
-  const privateKey = process.env.GITHUB_PRIVATE_KEY.replace(/\\n/g, '\n')
+  const privateKey = formatPrivateKey(process.env.GITHUB_PRIVATE_KEY)
 
   const app = new App({
     appId: process.env.GITHUB_APP_ID,
