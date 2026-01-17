@@ -118,5 +118,17 @@
     "w": 3862,
     "h": 2578,
     "bytes": 5972398
+  },
+  {
+    "path": "assets/Team Headshots/headshot-clint-mccree.png",
+    "w": 960,
+    "h": 1088,
+    "bytes": 1278333
+  },
+  {
+    "path": "assets/Team Headshots/headshot-colby-young.png",
+    "w": 708,
+    "h": 708,
+    "bytes": 457315
   }
 ]
