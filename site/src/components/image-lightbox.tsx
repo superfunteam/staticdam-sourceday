@@ -8,7 +8,8 @@ import {
   Sheet,
   SheetContent,
   SheetFooter,
-  SheetHeader,
+  SheetTitle,
+  SheetDescription,
 } from '@/components/ui/sheet'
 import type { ImageMetadata } from '@/types'
 import { PdfViewer } from '@/components/pdf-viewer'
@@ -303,7 +304,13 @@ export function ImageLightbox({ image, images, isOpen, onClose, onNavigate, onEd
         className="inset-0 w-full max-w-full h-full p-0 border-none sm:max-w-full bg-transparent [&[data-state=open]]:animate-none [&[data-state=closed]]:animate-none"
         side="right"
         hideCloseButton
+        aria-describedby={undefined}
       >
+        {/* Accessibility: visually hidden title for screen readers */}
+        <SheetTitle className="sr-only">
+          {fileName}
+        </SheetTitle>
+
         {/* Custom close button with proper z-index */}
         <button
           onClick={onClose}
