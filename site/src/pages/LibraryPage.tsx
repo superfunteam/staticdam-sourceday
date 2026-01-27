@@ -81,21 +81,21 @@ const ImageGridItem = memo(({ image, isSelected, onToggleSelect, onOpenLightbox 
         {isPdf ? (
           // Document well container for PDFs
           <div className="absolute inset-0 flex flex-col pt-3 px-3 bg-gray-200 dark:bg-gray-800 rounded-xl">
-            <div className="relative flex-1 bg-white dark:bg-gray-900 rounded-t-lg shadow-md flex items-center justify-center p-2 pb-4">
+            <div className="relative flex-1 bg-white dark:bg-gray-900 rounded-t-lg shadow-md flex items-center justify-center p-2">
               <img
                 src={thumbnailPath}
                 alt={fileName}
                 className="max-w-full max-h-full object-contain"
                 loading="lazy"
                 onError={(e) => {
-                  // Hide the image on error, show PDF icon instead
+                  // Hide the image on error
                   e.currentTarget.style.display = 'none'
                 }}
               />
-              {/* PDF badge */}
-              <div className="absolute bottom-2 right-2 bg-red-600 rounded px-1.5 py-0.5">
-                <span className="text-white text-xs font-bold">PDF</span>
-              </div>
+            </div>
+            {/* PDF pill badge - on the gray well */}
+            <div className="absolute bottom-2 right-2 bg-red-600 rounded-full px-2 py-0.5">
+              <span className="text-white text-xs font-bold">PDF</span>
             </div>
           </div>
         ) : (
