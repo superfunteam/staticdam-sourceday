@@ -120,6 +120,27 @@
     "bytes": 5972398
   },
   {
+    "path": "assets/Case Studies/case-study-ag-leader.pdf",
+    "w": 612,
+    "h": 792,
+    "bytes": 29005077,
+    "isPdf": true
+  },
+  {
+    "path": "assets/Case Studies/case-study-spm.pdf",
+    "w": 612,
+    "h": 792,
+    "bytes": 33460464,
+    "isPdf": true
+  },
+  {
+    "path": "assets/Case Studies/case-study-time-mfg.pdf",
+    "w": 612,
+    "h": 792,
+    "bytes": 11748384,
+    "isPdf": true
+  },
+  {
     "path": "assets/Team Headshots/headshot-clint-mccree.png",
     "w": 960,
     "h": 1088,

@@ -11,6 +11,7 @@ import {
   SheetHeader,
 } from '@/components/ui/sheet'
 import type { ImageMetadata } from '@/types'
+import { PdfViewer } from '@/components/pdf-viewer'
 
 // StaticDAM Logo Component
 const StaticDAMLogo = ({ className }: { className?: string }) => (
@@ -61,6 +62,7 @@ export function ImageLightbox({ image, images, isOpen, onClose, onNavigate, onEd
   const hasPrev = currentIndex > 0
   const hasNext = currentIndex < images.length - 1
   const isVideo = image.isVideo || /\.(mp4|mov|webm|avi)$/i.test(image.path)
+  const isPdf = image.isPdf || /\.pdf$/i.test(image.path)
 
   // Animated close function - slides sheet down then closes
   const closeWithAnimation = useCallback(() => {
@@ -181,9 +183,9 @@ export function ImageLightbox({ image, images, isOpen, onClose, onNavigate, onEd
     }
   }, [imageBlobUrl])
 
-  // Fetch image with progress tracking (only for non-video)
+  // Fetch image with progress tracking (only for non-video and non-PDF)
   useEffect(() => {
-    if (isVideo || !isOpen) return
+    if (isVideo || isPdf || !isOpen) return
 
     const controller = new AbortController()
 
@@ -235,7 +237,7 @@ export function ImageLightbox({ image, images, isOpen, onClose, onNavigate, onEd
     return () => {
       controller.abort()
     }
-  }, [image.path, isVideo, isOpen])
+  }, [image.path, isVideo, isPdf, isOpen])
 
   const handleDownload = () => {
     const link = document.createElement('a')
@@ -321,12 +323,12 @@ export function ImageLightbox({ image, images, isOpen, onClose, onNavigate, onEd
             onTouchEnd={handleTouchEnd}
           >
 
-            {/* Main Media (Image or Video) */}
+            {/* Main Media (Image, Video, or PDF) */}
             <div
-              className="max-w-full max-h-full flex items-center justify-center relative transition-transform duration-150 ease-out"
+              className={`max-w-full max-h-full flex items-center justify-center relative transition-transform duration-150 ease-out ${isPdf ? 'w-full h-full overflow-y-auto bg-gray-100 dark:bg-gray-900 rounded-lg' : ''}`}
               style={{ transform: swipeOffset ? `translateX(${swipeOffset}px)` : undefined }}
             >
-              {isLoading && (
+              {isLoading && !isPdf && (
                 <div className="absolute inset-0 flex items-center justify-center">
                   <div className="flex flex-col items-center gap-3">
                     <Loader2 className="h-8 w-8 animate-spin text-white" />
@@ -353,7 +355,9 @@ export function ImageLightbox({ image, images, isOpen, onClose, onNavigate, onEd
                   </div>
                 </div>
               )}
-              {isVideo ? (
+              {isPdf ? (
+                <PdfViewer url={`/${image.path}`} />
+              ) : isVideo ? (
                 <video
                   ref={videoRef}
                   src={`/${image.path}`}

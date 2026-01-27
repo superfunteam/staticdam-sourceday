@@ -26,6 +26,7 @@ interface ManifestEntry {
   hierarchical?: string[]
   duration?: number
   isVideo?: boolean
+  isPdf?: boolean
 }
 
 async function extractMetadata(filePath: string): Promise<ManifestEntry | null> {
@@ -40,13 +41,25 @@ async function extractMetadata(filePath: string): Promise<ManifestEntry | null> 
 
     // Check if this is a video file
     const isVideo = /\.(mp4|mov|webm|avi)$/i.test(filePath)
+    // Check if this is a PDF file
+    const isPdf = /\.pdf$/i.test(filePath)
+
+    // Get dimensions - for PDFs use PDF-specific fields or defaults
+    let width = exif['EXIF:ImageWidth'] || exif['File:ImageWidth'] || exif['PNG:ImageWidth'] || exif['EXIF:ExifImageWidth'] ||
+         exif['QuickTime:ImageWidth'] || exif['QuickTime:SourceImageWidth'] || exif['Composite:ImageWidth'] || 0
+    let height = exif['EXIF:ImageHeight'] || exif['File:ImageHeight'] || exif['PNG:ImageHeight'] || exif['EXIF:ExifImageHeight'] ||
+         exif['QuickTime:ImageHeight'] || exif['QuickTime:SourceImageHeight'] || exif['Composite:ImageHeight'] || 0
+
+    if (isPdf) {
+      // Use PDF page dimensions or standard letter size (612x792 points)
+      width = exif['PDF:PageWidth'] || 612
+      height = exif['PDF:PageHeight'] || 792
+    }
 
     const entry: ManifestEntry = {
       path: filePath.replace(/^\.\//, ''),
-      w: exif['EXIF:ImageWidth'] || exif['File:ImageWidth'] || exif['PNG:ImageWidth'] || exif['EXIF:ExifImageWidth'] ||
-         exif['QuickTime:ImageWidth'] || exif['QuickTime:SourceImageWidth'] || exif['Composite:ImageWidth'] || 0,
-      h: exif['EXIF:ImageHeight'] || exif['File:ImageHeight'] || exif['PNG:ImageHeight'] || exif['EXIF:ExifImageHeight'] ||
-         exif['QuickTime:ImageHeight'] || exif['QuickTime:SourceImageHeight'] || exif['Composite:ImageHeight'] || 0,
+      w: width,
+      h: height,
       bytes: exif['File:FileSize'] || exif['System:FileSize'] || 0,
     }
 
@@ -58,6 +71,11 @@ async function extractMetadata(filePath: string): Promise<ManifestEntry | null> 
       if (duration) {
         entry.duration = typeof duration === 'string' ? parseFloat(duration) : duration
       }
+    }
+
+    // Add PDF-specific fields
+    if (isPdf) {
+      entry.isPdf = true
     }
 
     if (exif['EXIF:DateTimeOriginal'] || exif['EXIF:CreateDate']) {
@@ -180,6 +198,7 @@ async function main() {
     'assets/**/*.{mov,MOV}',
     'assets/**/*.{webm,WEBM}',
     'assets/**/*.{avi,AVI}',
+    'assets/**/*.{pdf,PDF}',
   ]
 
   const files: string[] = []

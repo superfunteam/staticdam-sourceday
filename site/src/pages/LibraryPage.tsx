@@ -32,6 +32,7 @@ interface ImageGridItemProps {
 
 const ImageGridItem = memo(({ image, isSelected, onToggleSelect, onOpenLightbox }: ImageGridItemProps) => {
   const thumbnailPath = useMemo(() => getThumbnailPath(image.path), [image.path])
+  const isPdf = image.isPdf || /\.pdf$/i.test(image.path)
 
   const gridItemClassName = useMemo(() =>
     `group relative cursor-pointer rounded-xl overflow-hidden transition-all ${
@@ -77,23 +78,48 @@ const ImageGridItem = memo(({ image, isSelected, onToggleSelect, onOpenLightbox 
       </div>
 
       <div className="aspect-square bg-gray-100 dark:bg-gray-900 rounded-xl relative">
-        <img
-          src={thumbnailPath}
-          alt={image.subject || fileName}
-          className="w-full h-full object-cover rounded-xl"
-          loading="lazy"
-          onError={(e) => {
-            // Fallback to original image if thumbnail fails to load
-            e.currentTarget.src = `/${image.path}`
-          }}
-        />
-        {/* Video play icon overlay */}
-        {image.isVideo && (
-          <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-            <div className="bg-black dark:bg-white rounded-lg p-3">
-              <Play className="h-6 w-6 text-white dark:text-black fill-white dark:fill-black" />
+        {isPdf ? (
+          // Document well container for PDFs
+          <div className="absolute inset-0 flex flex-col pt-3 px-3 bg-gray-200 dark:bg-gray-800 rounded-xl">
+            <div className="relative flex-1 bg-white dark:bg-gray-900 rounded-t-lg shadow-md flex items-center justify-center p-2 pb-4">
+              <img
+                src={thumbnailPath}
+                alt={fileName}
+                className="max-w-full max-h-full object-contain"
+                loading="lazy"
+                onError={(e) => {
+                  // Hide the image on error, show PDF icon instead
+                  e.currentTarget.style.display = 'none'
+                }}
+              />
+              {/* PDF badge */}
+              <div className="absolute bottom-2 right-2 bg-red-600 rounded px-1.5 py-0.5">
+                <span className="text-white text-xs font-bold">PDF</span>
+              </div>
             </div>
           </div>
+        ) : (
+          // Regular image/video thumbnail
+          <>
+            <img
+              src={thumbnailPath}
+              alt={image.subject || fileName}
+              className="w-full h-full object-cover rounded-xl"
+              loading="lazy"
+              onError={(e) => {
+                // Fallback to original image if thumbnail fails to load
+                e.currentTarget.src = `/${image.path}`
+              }}
+            />
+            {/* Video play icon overlay */}
+            {image.isVideo && (
+              <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                <div className="bg-black dark:bg-white rounded-lg p-3">
+                  <Play className="h-6 w-6 text-white dark:text-black fill-white dark:fill-black" />
+                </div>
+              </div>
+            )}
+          </>
         )}
       </div>
       <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity rounded-xl">

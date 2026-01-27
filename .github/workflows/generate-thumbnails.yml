@@ -30,10 +30,14 @@ jobs:
         with:
           version: 8
 
-      - name: Install ImageMagick with WebP support
+      - name: Install ImageMagick with WebP support and Ghostscript for PDF
         run: |
           sudo apt-get update
-          sudo apt-get install -y imagemagick libwebp-dev
+          sudo apt-get install -y imagemagick libwebp-dev ghostscript
+
+      - name: Configure ImageMagick for PDF processing
+        run: |
+          sudo sed -i 's/rights="none" pattern="PDF"/rights="read|write" pattern="PDF"/' /etc/ImageMagick-6/policy.xml || true
 
       - name: Install FFmpeg for video processing
         run: |

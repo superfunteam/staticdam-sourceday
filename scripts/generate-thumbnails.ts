@@ -21,6 +21,7 @@ function shouldGenerateThumbnail(originalPath: string, thumbnailPath: string): b
 function getOutputPath(inputPath: string): string {
   // Convert assets/folder/image.jpg -> assets-thumbs/folder/image.jpg
   // For videos, use .webp extension for animated thumbnails
+  // For PDFs, use .jpg extension
   const relativePath = inputPath.replace(/^assets\//, '')
   const dir = dirname(relativePath)
   const nameWithoutExt = basename(relativePath, extname(relativePath))
@@ -30,6 +31,27 @@ function getOutputPath(inputPath: string): string {
 
   const outputDir = dir === '.' ? 'assets-thumbs' : `assets-thumbs/${dir}`
   return `${outputDir}/${nameWithoutExt}${ext}`
+}
+
+async function generatePdfThumbnail(inputPath: string, outputPath: string): Promise<boolean> {
+  try {
+    // Uses ImageMagick to extract first page [0]
+    // -density 150 for good quality, -background white -alpha remove for transparency
+    const args = [
+      '-density', '150',
+      `${inputPath}[0]`,
+      '-background', 'white',
+      '-alpha', 'remove',
+      '-resize', '800x800>',
+      '-quality', '90',
+      outputPath
+    ]
+    execSync(`convert ${args.map(arg => `"${arg}"`).join(' ')}`, { stdio: 'pipe' })
+    return true
+  } catch (error) {
+    console.error(`Error generating PDF thumbnail for ${inputPath}:`, error)
+    return false
+  }
 }
 
 async function generateVideoThumbnail(inputPath: string, outputPath: string): Promise<boolean> {
@@ -104,14 +126,21 @@ async function generateThumbnail(inputPath: string): Promise<ThumbnailResult> {
       mkdirSync(outputDir, { recursive: true })
     }
 
-    // Check if this is a video file
+    // Check if this is a video or PDF file
     const isVideo = /\.(mp4|mov|webm|avi)$/i.test(inputPath)
+    const isPdf = /\.pdf$/i.test(inputPath)
 
     if (isVideo) {
       // Generate video thumbnail at 50% duration
       const success = await generateVideoThumbnail(inputPath, outputPath)
       if (!success) {
         throw new Error('Failed to generate video thumbnail')
+      }
+    } else if (isPdf) {
+      // Generate PDF thumbnail from first page
+      const success = await generatePdfThumbnail(inputPath, outputPath)
+      if (!success) {
+        throw new Error('Failed to generate PDF thumbnail')
       }
     } else {
       // Generate image thumbnail
@@ -146,7 +175,7 @@ async function generateThumbnail(inputPath: string): Promise<ThumbnailResult> {
 async function main() {
   console.log('Generating thumbnails...')
 
-  // Find all image and video files in assets directory
+  // Find all image, video, and PDF files in assets directory
   const patterns = [
     'assets/**/*.{jpg,jpeg,JPG,JPEG}',
     'assets/**/*.{tif,tiff,TIF,TIFF}',
@@ -157,6 +186,7 @@ async function main() {
     'assets/**/*.{mov,MOV}',
     'assets/**/*.{webm,WEBM}',
     'assets/**/*.{avi,AVI}',
+    'assets/**/*.{pdf,PDF}',
   ]
 
   const files: string[] = []
