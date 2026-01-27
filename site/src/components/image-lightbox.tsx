@@ -324,11 +324,16 @@ export function ImageLightbox({ image, images, isOpen, onClose, onNavigate, onEd
           >
 
             {/* Main Media (Image, Video, or PDF) */}
+            {isPdf ? (
+              <div className="absolute inset-4 bottom-16 overflow-y-auto bg-gray-100 dark:bg-gray-900 rounded-lg">
+                <PdfViewer url={`/${image.path}`} />
+              </div>
+            ) : (
             <div
-              className={`max-w-full max-h-full flex items-center justify-center relative transition-transform duration-150 ease-out ${isPdf ? 'w-full h-full overflow-y-auto bg-gray-100 dark:bg-gray-900 rounded-lg' : ''}`}
+              className="max-w-full max-h-full flex items-center justify-center relative transition-transform duration-150 ease-out"
               style={{ transform: swipeOffset ? `translateX(${swipeOffset}px)` : undefined }}
             >
-              {isLoading && !isPdf && (
+              {isLoading && (
                 <div className="absolute inset-0 flex items-center justify-center">
                   <div className="flex flex-col items-center gap-3">
                     <Loader2 className="h-8 w-8 animate-spin text-white" />
@@ -355,9 +360,7 @@ export function ImageLightbox({ image, images, isOpen, onClose, onNavigate, onEd
                   </div>
                 </div>
               )}
-              {isPdf ? (
-                <PdfViewer url={`/${image.path}`} />
-              ) : isVideo ? (
+              {isVideo ? (
                 <video
                   ref={videoRef}
                   src={`/${image.path}`}
@@ -397,7 +400,7 @@ export function ImageLightbox({ image, images, isOpen, onClose, onNavigate, onEd
                 />
               ) : null}
             </div>
-
+            )}
 
             {/* Navigation Bar */}
             <div className="absolute bottom-4 md:bottom-4 left-1/2 -translate-x-1/2 flex items-center gap-4 bg-black/50 text-white px-4 py-2 rounded-full z-10">
@@ -540,32 +543,34 @@ export function ImageLightbox({ image, images, isOpen, onClose, onNavigate, onEd
                       </div>
                     </div>
 
-                    {/* Peel */}
-                    <div className="flex items-center gap-2">
-                      <PeelLogo className="h-4 w-4 text-muted-foreground flex-shrink-0" />
-                      <span className="text-muted-foreground flex-shrink-0 w-10">Peel</span>
-                      <div className="relative flex-1 min-w-0">
-                        <a
-                          href={peelUrl}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="block w-full px-2 pr-8 py-1 text-xs border rounded bg-muted/50 text-muted-foreground truncate hover:bg-muted/70 transition-colors cursor-pointer"
-                          title={peelUrl}
-                        >
-                          {peelUrl}
-                        </a>
-                        <button
-                          className="absolute right-1 top-1/2 -translate-y-1/2 p-1 hover:bg-gray-100 dark:hover:bg-gray-800 rounded transition-colors"
-                          onClick={(e) => {
-                            e.preventDefault()
-                            e.stopPropagation()
-                            copyToClipboard(peelUrl, 'Peel URL')
-                          }}
-                        >
-                          <Copy className="h-3 w-3 text-muted-foreground" />
-                        </button>
+                    {/* Peel - only for images, not PDFs */}
+                    {!isPdf && (
+                      <div className="flex items-center gap-2">
+                        <PeelLogo className="h-4 w-4 text-muted-foreground flex-shrink-0" />
+                        <span className="text-muted-foreground flex-shrink-0 w-10">Peel</span>
+                        <div className="relative flex-1 min-w-0">
+                          <a
+                            href={peelUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="block w-full px-2 pr-8 py-1 text-xs border rounded bg-muted/50 text-muted-foreground truncate hover:bg-muted/70 transition-colors cursor-pointer"
+                            title={peelUrl}
+                          >
+                            {peelUrl}
+                          </a>
+                          <button
+                            className="absolute right-1 top-1/2 -translate-y-1/2 p-1 hover:bg-gray-100 dark:hover:bg-gray-800 rounded transition-colors"
+                            onClick={(e) => {
+                              e.preventDefault()
+                              e.stopPropagation()
+                              copyToClipboard(peelUrl, 'Peel URL')
+                            }}
+                          >
+                            <Copy className="h-3 w-3 text-muted-foreground" />
+                          </button>
+                        </div>
                       </div>
-                    </div>
+                    )}
                   </div>
                 </div>
 
